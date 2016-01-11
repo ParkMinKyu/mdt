@@ -73,4 +73,5 @@ iframe{
 	width: 550px;
     margin: 5px auto;
     background: #fff;
+    clear: both;
 }

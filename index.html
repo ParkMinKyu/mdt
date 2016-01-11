@@ -59,6 +59,7 @@ var scheduler = {
 		},
 		toEvent : function(scheduler){
 			var event = $('#calendar').fullCalendar('clientEvents',scheduler.id);
+			if(event[0] == null)event[0] = {}; 
 			event[0].id = scheduler.id,
 			event[0].title = scheduler.title,
 			event[0].contents = scheduler.contents,

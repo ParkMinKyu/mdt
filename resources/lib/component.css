@@ -69,3 +69,8 @@ iframe{
 .fb-like iframe{
 	z-index:10
 }
+.comments{
+	width: 550px;
+    margin: 5px auto;
+    background: #fff;
+}

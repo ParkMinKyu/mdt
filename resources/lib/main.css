@@ -3,7 +3,9 @@
 	font-family: "돋움";
 	font-size: 12px;
 }
-
+iframe{
+	vertical-align : bottom;
+}
 font{
 	font-weight: bold;
 }

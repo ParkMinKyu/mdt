@@ -61,3 +61,11 @@
 	position: relative;
     margin-top: 5px;
 }
+
+iframe{
+	vertical-align:bottom;
+	
+}
+.fb-like iframe{
+	z-index:10
+}

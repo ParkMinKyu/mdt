@@ -447,14 +447,6 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
       statusChangeCallback(response);
     });
   }
-  window.fbAsyncInit = function() {
-  FB.init({
-    appId      : '189064184781774',
-    cookie     : true,  // enable cookies to allow the server to access 
-                        // the session
-    xfbml      : true,  // parse social plugins on this page
-    version    : 'v2.5' // use version 2.2
-  });
   // Now that we've initialized the JavaScript SDK, we call 
   // FB.getLoginStatus().  This function gets the state of the
   // person visiting this page and can return one of three states to
@@ -476,7 +468,6 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
-      scheduler.writer = response.id;
      /*  document.getElementById('status').innerHTML =
         'Thanks for logging in, ' + response.name + '!'; */
     });
@@ -494,6 +485,14 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 	<div style="background: #fff">
 		<div class="fb-login-button" data-max-rows="1" data-size="icon" data-show-faces="true" data-auto-logout-link="true"></div>
 		<script>
+		  window.fbAsyncInit = function() {
+		    FB.init({
+		      appId      : '189064184781774',
+		      xfbml      : true,
+		      version    : 'v2.5'
+		    });
+		  };
+
 		(function(d, s, id) {
 			var js, fjs = d.getElementsByTagName(s)[0];
 			if (d.getElementById(id)) return;
@@ -703,9 +702,9 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 			</div>
 		</div>
 	</div>
-<!-- <div style="float: right; margin: 10px;">
+<div style="float: right; margin: 10px;">
 	<iframe src="https://ghbtns.com/github-btn.html?user=ParkMinKyu&amp;repo=mdt&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="75px" height="20px"></iframe>
 	<iframe src="https://ghbtns.com/github-btn.html?user=ParkMinKyu&amp;repo=mdt&amp;type=fork&amp;count=true" frameborder="0" scrolling="0" width="75px" height="20px"></iframe>
 	<iframe src="https://ghbtns.com/github-btn.html?user=ParkMinKyu&amp;type=follow&amp;count=true" frameborder="0" scrolling="0" width="165px" height="20px"></iframe>
-</div> -->	
+</div>	
 </body>

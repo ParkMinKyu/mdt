@@ -63,9 +63,8 @@ var scheduler = {
 			event[0].id = scheduler.id,
 			event[0].title = scheduler.title,
 			event[0].contents = scheduler.contents,
-			event[0].start = new Date(scheduler.start),
-			event[0].end = new Date(scheduler.end),
-			event[0].writer = scheduler.writer
+			event[0].start = new Date(scheduler.start||scheduler.starttime),
+			event[0].end = new Date(scheduler.end||scheduler.endtime),
 			return event[0];
 		}		
 };
@@ -195,7 +194,7 @@ function renderCalendar() {
 		            dataType: 'json',
 		            data: {
 		        		starttime : sdate._d.getTime(),
-		        		endtime : edate._d.getTime(),
+		        		endtime : edate._d.getTime()
 		            },
 		            success: function(response) {
 		        	 	var events = [];
@@ -479,7 +478,7 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
-      scheduler.writer = response.name;
+      scheduler.writer = response.id;
      /*  document.getElementById('status').innerHTML =
         'Thanks for logging in, ' + response.name + '!'; */
     });

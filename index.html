@@ -500,7 +500,7 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 		<li id="Employee"><a href="#">Employee</a></li>
 	</ul>
 	<div style="background: #fff">
-		<div class="fb-login-button" data-max-rows="1" data-size="icon" data-show-faces="true" data-auto-logout-link="true"></div>
+	<fb:login-button scope="public_profile,email" onlogin="checkLoginState();" data-max-rows="1" data-size="icon" data-show-faces="true" data-auto-logout-link="true"></fb:login-button>
 	</div>
 	<div class="navbar">
 		<input type="text" class="input mini" />

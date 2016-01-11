@@ -1,28 +1,423 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login JavaScript Example</title>
-<meta charset="UTF-8">
-<meta name="google-signin-scope" content="profile email">
-<meta name="google-signin-client_id" content="AIzaSyA_2wGlFOV2i4w1AaZaqmEMLxZzBotlRyI.apps.googleusercontent.com">
-<script src="https://apis.google.com/js/platform.js" async defer></script>
-</head>
-<body>
-<div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-    <script>
-      function onSignIn(googleUser) {
-        // Useful data for your client-side scripts:
-        var profile = googleUser.getBasicProfile();
-        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
-        console.log("Name: " + profile.getName());
-        console.log("Image URL: " + profile.getImageUrl());
-        console.log("Email: " + profile.getEmail());
+<meta charset="utf-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-title" content="My Daily Trainer">
+<meta property="og:title" content="My Daily Trainer">
+<meta property="og:url" content="http://www.niee.kr/mdt">
+<meta property="og:image" content="http://parkminkyu.github.io/Blog/favicon.png">
+<meta property="og:description" content="나의 일정, 목표 달성 트레이너!!">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="My Daily Trainer">
+<meta name="twitter:url" content="http://www.niee.kr/mdt">
+<meta name="twitter:image" content="http://parkminkyu.github.io/Blog/favicon.png">
+<meta name="twitter:description" content="나의 일정, 목표 달성 트레이너!!">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?1">
+<link rel="stylesheet" href="/mdt/resources/jui-1.4.3/dist/jui.min.css" />
+<link rel="stylesheet" href="/mdt/resources/jui-1.4.3/dist/dark.theme.min.css" />
+<link rel="stylesheet" href="/mdt/resources/fullcalendar-2.5.0/fullcalendar.min.css" />
+<link rel="stylesheet" href="/mdt/resources/fullcalendar-2.5.0/fullcalendar.print.css" media="print"/>
+<link rel="stylesheet" href="/mdt/resources/lib/component.css" />
+<script src="/mdt/resources/SE/js/HuskyEZCreator.js" type="text/javascript" charset="utf-8"></script>
+<script src="/mdt/resources/lib/intranet_DATE.js"></script>
+<script src="/mdt/resources/lib/jquery-2.1.4.min.js"></script>
+<script src="/mdt/resources/jui-1.4.3/dist/jui.min.js"></script>
+<script src="/mdt/resources/fullcalendar-2.5.0/lib/moment.min.js"></script>
+<script src="/mdt/resources/fullcalendar-2.5.0/fullcalendar.min.js"></script>
+<script src="/mdt/resources/fullcalendar-2.5.0/lang-all.js"></script>
+<script>
+var currentLangCode = 'ko';
+var oEditors = [];
+var scheduler = {
+		id : '',
+		title : '',
+		contents : '',
+		starttime : '',
+		endtime : '',
+		writer : '',
+		eventToscheduler : function(event){
+			this.id = event.id;
+			this.title = event.title;
+			this.contents = event.contents;
+			this.starttime = event.start;
+			this.endtime = event.end;
+			this.writer = event.writer;
+		},
+		toEvent : function(){
+			return event = {
+				id : this.id,
+				title : this.title,
+				contents : this.contents,
+				start : new Date(this.start),
+				end : new Date(this.end),
+				writer : this.writer
+			}
+		},
+		toEvent : function(scheduler){
+			var event = $('#calendar').fullCalendar('clientEvents',scheduler.id);
+			event[0].id = scheduler.id,
+			event[0].title = scheduler.title,
+			event[0].contents = scheduler.contents,
+			event[0].start = new Date(scheduler.start),
+			event[0].end = new Date(scheduler.end),
+			event[0].writer = scheduler.writer
+			return event[0];
+		}		
+};
+var article = {};
+$(function(){	
+	$('#contentsModify').on('click',function(){
+		$('#writeModal #title').val(scheduler.title);
+		oEditors.getById["contents"].exec("PASTE_HTML",[scheduler.contents]);
+		contentView.hide();
+		writeWindow.show();
+	});
+	
+	$('#writeBtn').on('click',function(){
+		var type = 'post';
+		oEditors.getById["contents"].exec("UPDATE_CONTENTS_FIELD", []);
+		scheduler.title = $('#writeModal #title').val();
+		scheduler.contents = $('#contents').val();
+		scheduler.writer = 'parkmk';
+		scheduler.allDay = true;
+		scheduler.starttime = new Date();
+		scheduler.endtime = new Date();
+		if(scheduler.id > 0 ){
+			type = "put";
+		}
+		$.ajax({
+			url: "http://localhost:10000/scheduler",
+			type : type,
+			dataType: 'json',
+			contentType: "application/json; charset=utf-8",
+			data: JSON.stringify(scheduler),
+			success: function(response) {
+				writeWindow.hide();
+				if(scheduler.id > 0 ){
+					$('#calendar').fullCalendar('updateEvent',scheduler.toEvent(response));
+				}else{
+					$('#calendar').fullCalendar('renderEvent',scheduler.toEvent(response));
+				}
+			},
+			error : function(response, txt){
+				console.log(response);
+				console.log(txt);
+			}
+		});
+	});
+	
+	$('#contentsDelete').on('click',function(){
+		if(confirm("해당 일정을 삭제 합니다.")){
+			$.ajax({
+				url: "http://localhost:10000/scheduler",
+				type : 'delete',
+				dataType: 'json',
+				contentType: "application/json; charset=utf-8",
+				data: JSON.stringify(scheduler),
+				success: function(response) {
+					contentView.hide();
+					$('#calendar').fullCalendar('removeEvents',scheduler.id);
+				},
+				error : function(response, txt){
+					console.log(response);
+					console.log(txt);
+				}
+			});
+		}
+	});
+	
+	$('ul.tab > li').on('click',function(){
+		$('ul.tab > li').removeClass('active');
+		$(this).addClass('active');
+		
+		$('#mainDiv > div').hide();
+		$('#div'+this.id).show();
+	});		
+	
+	/* build the language selector's options
+	$.each($.fullCalendar.langs, function(langCode) {
+		$('#langSelector > ul').append(
+			$('<li/>')
+				.attr('value', langCode)					
+				.text(langCode)
+		);
+	});		*/
+	
+	$($('ul.tab > li')[0]).click();
+	
+	renderCalendar();	
+	
+	nhn.husky.EZCreator.createInIFrame({
+		oAppRef: oEditors,
+		elPlaceHolder: "contents",
+		sSkinURI: "/mdt/resources/SE/SmartEditor2Skin.html",	
+		htParams : {
+			bUseToolbar : true,				// 툴바 사용 여부 (true:사용/ false:사용하지 않음)
+			bUseVerticalResizer : true,		// 입력창 크기 조절바 사용 여부 (true:사용/ false:사용하지 않음)
+			bUseModeChanger : true,			// 모드 탭(Editor | HTML | TEXT) 사용 여부 (true:사용/ false:사용하지 않음)
+			//aAdditionalFontList : aAdditionalFontSet,		// 추가 글꼴 목록
+			fOnBeforeUnload : function(){
+				//alert("완료!");
+			}
+		}, //boolean
+		fOnAppLoad : function(){
+			//예제 코드
+			//oEditors.getById["ir1"].exec("PASTE_HTML", ["로딩이 완료된 후에 본문에 삽입되는 text입니다."]);
+		},
+		fCreator: "createSEditor2"
+	});
+});
 
-        // The ID token you need to pass to your backend:
-        var id_token = googleUser.getAuthResponse().id_token;
-        console.log("ID Token: " + id_token);
-      };
-    </script>
+function renderCalendar() {
+	$('#calendar').fullCalendar({
+		header: {
+			left: '',
+			center: 'prev title next',
+			right: 'today month,agendaWeek,agendaDay'
+		},
+		lang: currentLangCode,
+		buttonIcons: true, // show the prev/next text
+		weekNumbers: false,
+		editable: false,
+		eventLimit: true, // allow "more" link when too many events
+		events: function(sdate,edate,timezone,callback){
+		    /* console.log(sdate.unix());
+		    console.log(edate.unix());
+		    console.log(timezone);
+		    console.log(callback); */
+		    
+		    $.ajax({
+		            url: "http://localhost:10000/scheduler",
+		            dataType: 'json',
+		            data: {
+		        		starttime : sdate._d.getTime(),
+		        		endtime : edate._d.getTime(),
+		            },
+		            success: function(response) {
+		        	 	var events = [];
+		                for(var i = 0 ; i < response.length ; i ++){
+							console.log(response[i]);
+							events.push({	
+								id : response[i].ID,
+								allDay : response[i].ALLDAY,
+								title: response[i].TITLE,
+								start: new Date(response[i].STARTTIME),
+								end: new Date(response[i].ENDTIME),
+								contents : response[i].CONTENTS,
+								writer : response[i].WRITER
+							});
+		                }
+		                var moment = $('#calendar').fullCalendar('getDate');
+		                events = events.concat(getHoliday(moment),getPayDay(moment));
+		                callback(events);
+		            },
+		            error : function(response,txt){
+		            	console.log(response);
+		            	console.log(txt);
+		            }
+		        });
+		},
+		eventClick : function(e, jsE, view){
+			/* console.log(e);
+			console.log(jsE);
+			console.log(view); */
+			scheduler.eventToscheduler(e);
+			$('#contentView > .head > #title').text(e.title);
+			$('#contentView > .head > .subtext').text(getDateFormat(e.start, e.end));
+			contentView.update(e.contents);
+			contentView.show();
+		},
+		dayClick : function(date, jsE, view){
+			console.log(date);
+			console.log(jsE);
+			console.log(view);
+			scheduler.id = 0;
+			oEditors.getById["contents"].setContents('');
+			writeWindow.show();
+		}
+	});
+}
+
+function getDateFormat(start, end, pattern){
+    if(!pattern){
+		pattern = 'YYYY/MM/DD HH:mm';
+    }
+    if(start != null)
+    	start = start._isAMomentObject ? start : $.fullCalendar.moment(start);
+    
+    if(end != null)
+    	end = end._isAMomentObject ? end : $.fullCalendar.moment(end);
+    else
+		return start.format(pattern); 
+    
+    return $.fullCalendar.formatRange(start.format(),end.format(), pattern);
+}
+
+jui.ready([ "ui.dropdown" ], function(dropdown) {
+    langSelector = dropdown("#langSelector", {
+        keydown: true,
+        event: {
+            change: function(data) {
+				currentLangCode = data.value;
+				$('#langText').html(data.text + ' <i class="icon-arrow1"></i>');
+				$('#calendar').fullCalendar('destroy');
+				renderCalendar();
+            }
+        }
+    });
+});
+
+jui.ready([ "uix.window" ], function(win) {
+    contentView = win("#contentView", {
+        width: 500,
+        height: 300,
+        left: "30%",
+        top: 200,
+        resize: true,
+        move: true
+    });
+});
+
+jui.ready([ "uix.table" ], function(table) {
+    table_1 = table("#table_1", {
+        data: [
+            { name: "Hong", age: "20", location: "Ilsan" },
+            { name: "Jung", age: "30", location: "Seoul" },
+            { name: "Park", age: "15", location: "Yeosu" },
+            { name: "Kang", age: "32", location: "Seoul" },
+            { name: "Song", age: "12", location: "Gwangju" },
+            { name: "Yoon", age: "22", location: "Damyang" },
+            { name: "Kim", age: "33", location: "Busan" },
+            { name: "Hwang", age: "21", location: "Seoul" },
+			{ name: "Hong", age: "20", location: "Ilsan" },
+            { name: "Jung", age: "30", location: "Seoul" },
+            { name: "Park", age: "15", location: "Yeosu" },
+            { name: "Kang", age: "32", location: "Seoul" },
+            { name: "Song", age: "12", location: "Gwangju" },
+            { name: "Yoon", age: "22", location: "Damyang" },
+            { name: "Kim", age: "33", location: "Busan" },            
+            { name: "Hwang", age: "21", location: "Seoul" }
+        ]
+    });
+});
+
+jui.ready([ "ui.paging" ], function(paging) {
+    paging_1 = paging("#paging_1", {
+        count: 1000,
+        pageCount: 16,
+        screenCount: 7,
+        event: {
+            page: function(pNo) {
+                alert(pNo);
+            }
+        }
+    });
+});
+
+jui.ready([ "uix.tree" ], function(tree) {
+    tree_1 = tree("#tree_1 .tree", {
+        root: { title: "C:\\" },
+        event: {
+            select: function(node) {
+                this.select(node.index);
+                alert("index(" + node.index + "), title(" + node.data.title + ")");
+            }
+        },
+        tpl: {
+            node: $("#tpl_node").html()
+        }
+    });
+    tree_1.append({ title: "Windows" });
+    tree_1.append({ title: "Download" });
+    tree_1.append({ title: "Program Files" });
+    tree_1.append({ title: "Apache" });
+    tree_1.append("0", { title: "run.exe" });
+    tree_1.append("0", { title: "setting.conf" });
+    tree_1.append("1", { title: "jui.torrrent" });
+    tree_1.insert("2.0", { title: "Riot Games" });
+    tree_1.insert("2.0.0", { title: "lol.exe" });
+    tree_1.append("3", { title: "startup.bat" });
+    tree_1.fold("0");
+    tree_1.fold("1");
+    tree_1.fold("3");
+});
+
+jui.ready([ "ui.accordion" ], function(accordion) {
+    accordion_2 = accordion("#accordion_2", {
+        event: {
+            open: function(index, e) {
+                $(this.root).find("i").attr("class", "icon-arrow1");
+                $(e.target).find("i").attr("class", "icon-arrow3");
+            }
+        },
+        index: 0,
+        autoFold: true
+    });
+});
+
+jui.ready([ "uix.window" ], function(win) {
+    writeWindow = win("#writeModal", {
+        width: 650,
+        height: 780,
+        left: "30%",
+        top: 50,
+    });
+});
+
+jui.ready([ "ui.datepicker" ], function(datepicker) {
+	spicker = datepicker("#spicker", {
+	    titleFormat: "yyyy년 MM월",
+	    format: "yyyy/MM/dd",
+	    event: {
+	       select: function(date, e) {
+	    	   if(spicker.getTime() > epicker.getTime()){
+					var sdate = new Date(spicker.getTime());
+		    		epicker.select(sdate.getFullYear(),sdate.getMonth()+1,sdate.getDate());
+		    		$('#starttime').val(date);
+				}else{
+					$('#starttime').val(date);
+				}
+	       },
+	       prev: function(e) {
+	    	   var sdate = new Date(spicker.getTime()-(1000*60*60*24*30));
+			   spicker.select(sdate.getFullYear(),sdate.getMonth()+1,sdate.getDate());
+	       },
+	       next: function(e) {
+	    	   var sdate = new Date(spicker.getTime()+(1000*60*60*24*30));
+			   spicker.select(sdate.getFullYear(),sdate.getMonth()+1,sdate.getDate());
+	       }
+	    }
+	});
+	epicker = datepicker("#epicker", {
+	    titleFormat: "yyyy년 MM월",
+	    format: "yyyy/MM/dd",
+	    event: {
+	       select: function(date, e) {
+	    	   if(spicker.getTime() > epicker.getTime()){
+	    		alert("종료일이 시작일보다 빠릅니다.");
+	    		var sdate = new Date(spicker.getTime());
+	    		epicker.select(sdate.getFullYear(),sdate.getMonth()+1,sdate.getDate());
+	    	   }else{
+	    	   	$('#endtime').val(date);
+	    	   }
+	       },
+	       prev: function(e) {
+	    	   var edate = new Date(epicker.getTime()-(1000*60*60*24*30));
+	    		epicker.select(edate.getFullYear(),edate.getMonth()+1,edate.getDate());
+	       },
+	       next: function(e) {
+	    	   var edate = new Date(epicker.getTime()+(1000*60*60*24*30));
+	    		epicker.select(edate.getFullYear(),edate.getMonth()+1,edate.getDate());
+	       }
+	    }
+	});
+});
+</script>
+</head>
+<body class="jui dark">
 <script>
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
@@ -46,7 +441,6 @@
         'into Facebook.';
     }
   }
-
   // This function is called when someone finishes with the Login
   // Button.  See the onlogin handler attached to it in the sample
   // code below.
@@ -55,7 +449,6 @@
       statusChangeCallback(response);
     });
   }
-
   window.fbAsyncInit = function() {
   FB.init({
     appId      : '189064184781774',
@@ -64,7 +457,6 @@
     xfbml      : true,  // parse social plugins on this page
     version    : 'v2.2' // use version 2.2
   });
-
   // Now that we've initialized the JavaScript SDK, we call 
   // FB.getLoginStatus().  This function gets the state of the
   // person visiting this page and can return one of three states to
@@ -76,39 +468,240 @@
   //    your app or not.
   //
   // These three cases are handled in the callback function.
-
   FB.getLoginStatus(function(response) {
     statusChangeCallback(response);
   });
-
   };
-
   // Here we run a very simple test of the Graph API after login is
   // successful.  See statusChangeCallback() for when this call is made.
   function testAPI() {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
-      document.getElementById('status').innerHTML =
-        'Thanks for logging in, ' + response.name + '!';
+     /*  document.getElementById('status').innerHTML =
+        'Thanks for logging in, ' + response.name + '!'; */
     });
   }
 </script>
 
-<!--
-  Below we include the Login Button social plugin. This button uses
-  the JavaScript SDK to present a graphical Login button that triggers
-  the FB.login() function when clicked.
--->
-<div class="fb-login-button" data-max-rows="1" data-size="icon" data-show-faces="true" data-auto-logout-link="true"></div>
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/ko_KR/sdk.js#xfbml=1&version=v2.5&appId=189064184781774";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
+    <ul class="tab top">
+		<li class="active" id="Schedule">
+			<a href="#"><i class="icon-home"></i> Schedule</a>
+		</li>
+		<li id="Article"><a href="#">Article</a></li>			
+		<li id="Etc"><a href="#">Etc</a></li>			
+		<li id="Employee"><a href="#">Employee</a></li>
+	</ul>
+	<div style="background: #fff">
+		<div class="fb-login-button" data-max-rows="1" data-size="icon" data-show-faces="true" data-auto-logout-link="true"></div>
+		<script>
+		(function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) return;
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/ko_KR/sdk.js#xfbml=1&version=v2.5&appId=189064184781774";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+		</script>
+	</div>
+	<div class="navbar">
+		<input type="text" class="input mini" />
+		<a class="btn small">검색 <i class="icon-search"></i></a>		
+		 <div class="inline-right right">
+			 <!--
+			  Below we include the Login Button social plugin. This button uses
+			  the JavaScript SDK to present a graphical Login button that triggers
+			  the FB.login() function when clicked.
+			-->
+			<a class="btn small" id="langText" onclick="langSelector.show();">한국어 <i class="icon-arrow1"></i></a>
+			<div id="langSelector" class="dropdown" style="margin-left: -15px;">
+				<div class="anchor"></div>
+				<ul style="width: 120px;">
+					<li value="ko">한국어</li>
+					<li value="en">English</li>					
+				</ul>        
+			</div>
+		</div>
+	</div>
+	<div id="contentView" class="msgbox detail hide">
+		<div class="head">
+			<div id="title">Detail Message</div>
+			<div class="subtext">2014.02.25 17:18:38</div>						
+			<a href="#" class="close"><i class="icon-exit"></i></a>
+		</div>
+		<div class="body">
+			Contents...<br/>
+		</div>
+		<div style="width: 75px; margin: -25px auto;">
+			<a href="#" id="contentsModify" class="btn small"><i class="icon-edit"></i></a>
+			<a href="#" id="contentsDelete" class="btn small"><i class="icon-trashcan"></i></a>
+		</div>
+	</div>
+	<!-- 스케줄등록모달 -->
+	<div id="writeModal" class="msgbox hide">
+		<div class="head">
+			<span>등록 폼</span>
+	    </div>
+		<div class="body">
+			<table>
+				<tr>
+					<td>
+						<input class="input input-rect" id="title" name="title" style="width: 612px" maxlength="100" placeholder="제목"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="schedulePicker">
+						<div style="float: left;">
+							<input class="input input-rect" id="starttime" name="starttime" style="width: 192px" placeholder="시작일" readonly="readonly"/>
+							<div id="spicker" class="datepicker">
+							    <div class="head">
+							        <div class="prev"><i class="icon-chevron-left"></i></div>
+							        <div class="title"></div>
+							        <div class="next"><i class="icon-chevron-right"></i></div>
+							    </div>
+							    <table class="body">
+							        <tr>
+							            <th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th>
+							        </tr>
+							    </table>
+							</div>
+						</div>
+						<div style="float: left;margin-top: 100px;margin-left: 100px;">
+							<a class="btn btn-gray btn-small"><i class="icon-chevron-right"></i></a>
+						</div>
+						<div style="float: right;">
+						<input class="input input-rect" id="endtime" name="endtime" style="width: 192px" placeholder="종료일" readonly="readonly"/>
+						<script data-jui="#spicker" data-tpl="dates" type="text/template">
+    						<tr>
+        						<! for(var i = 0; i < dates.length; i++) { !>
+        						<td><!= dates[i] !></td>
+        						<! } !>
+    						</tr>
+						</script>
+						<div id="epicker" class="datepicker">
+						    <div class="head">
+						        <div class="prev"><i class="icon-chevron-left"></i></div>
+						        <div class="title"></div>
+						        <div class="next"><i class="icon-chevron-right"></i></div>
+						    </div>
+						    <table class="body">
+						        <tr>
+						            <th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th>
+						        </tr>
+						    </table>
+						</div>
+						<script data-jui="#epicker" data-tpl="dates" type="text/template">
+    						<tr>
+        						<! for(var i = 0; i < dates.length; i++) { !>
+        						<td><!= dates[i] !></td>
+        						<! } !>
+    						</tr>
+						</script>
+						</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td style="border-spacing: 0px;border-collapse: 0px;border: 1px solid #BEBeBe;">
+						<span id="schedulefileName"></span>
+						<div id="scheduleFiles">
+							<input type="file" name="schedulefile" id="schedulefile"><br>
+							<a href="#" id="scheduleFileAddBtn" class="btn btn-gray btn-small">파일등록</a>(파일선택 후 등록해야 글 저장시 함께 등록 됩니다.)
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td style="border-spacing: 0px;border-collapse: 0px;height:25px;border: 1px solid #BEBeBe;">
+						공유 여부 : <input type="checkbox" id="etcYn"><font color="red">(체크시 Etc 에 표시 되지 않습니다.)</font>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<textarea class="input" id="contents" name="contents" style="width: 610px;height: 300px;" placeholder="내용"></textarea>
+					</td>
+				</tr>
+			</table>
+			<div style="text-align: center;">
+				<a href="#" id="writeBtn" class="btn btn-gray btn-small">저장</a>
+				<a href="#" onclick="writeWindow.hide();" class="btn btn-gray btn-small">Close</a>
+			</div>
+		</div>
+	</div>
+	
+	<div id="mainDiv">
+		<div id="divSchedule" class="hide">
+			<div id="calendar"></div>
+		</div>
+		
+		<div id="divEmployee" class="hide">
+			<div class="contentDiv">
+				<div id="accordion_2" class="accordion simple">
+					<div class="title active">
+						관리자 그룹 <i class="icon-arrow3"></i>
+					</div>
+					<div class="content">
+						The style components provide various options in addition to the basic functionality.
+						In addition, script components can be added, which facilitate the development of more diverse UI components.
+					</div>
+					<div class="title">
+						사용자 그룹 <i class="icon-arrow1"></i>
+					</div>
+					<div class="title">
+						방문자 그룹 <i class="icon-arrow1"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="divArticle" class="hide">			
+			<div class="contentDiv">
+				<div class="col col-4">
+					<div id="tree_1" class="row">				
+						<div>
+							<ul class="tree line"></ul>
+						</div>				
+					</div>
+						<script id="tpl_node" type="text/template">
+						<li>
+							<div><i></i> <!= title !></div>
+							<ul></ul>
+						</li>
+					</script>
+				</div>
+				<div class="col col-8">
+					<table id="table_1" class="table classic">
+						<thead>
+						<tr>
+							<th>Name</th>
+							<th>Age</th>
+							<th>Location</th>
+						</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+					
+					<script data-jui="#table_1" data-tpl="row" type="text/template">
+						<tr>
+							<td><!= name !></td>
+							<td><!= age !></td>
+							<td><!= location !></td>
+						</tr>
+					</script>
+					
+					<div id="paging_1" class="paging" style="width: 100%; margin-top: 3px;">
+						<a href="#" class="prev">Previous</a>
+						<div class="list"></div>
+						<a href="#" class="next">Next</a>
+					</div>
+					
+					<script data-jui="#paging_1" data-tpl="pages" type="text/template">
+						<! for(var i = 0; i < pages.length; i++) { !>
+						<a href="#" class="page"><!= pages[i] !></a>
+						<! } !>
+					</script>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
-</html>

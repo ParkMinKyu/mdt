@@ -82,7 +82,6 @@ $(function(){
 		oEditors.getById["contents"].exec("UPDATE_CONTENTS_FIELD", []);
 		scheduler.title = $('#writeModal #title').val();
 		scheduler.contents = $('#contents').val();
-		scheduler.writer = 'parkmk';
 		scheduler.allDay = true;
 		scheduler.starttime = new Date();
 		scheduler.endtime = new Date();
@@ -479,6 +478,7 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
+      scheduler.writer = response.name;
      /*  document.getElementById('status').innerHTML =
         'Thanks for logging in, ' + response.name + '!'; */
     });

@@ -494,7 +494,7 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
   }
 </script>
 
-    <ul class="tab top">
+	<ul class="tab top">
 		<li class="active" id="Schedule">
 			<a href="#"><i class="icon-home"></i> Schedule</a>
 		</li>
@@ -502,9 +502,6 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 		<li id="Etc"><a href="#">Etc</a></li>			
 		<li id="Employee"><a href="#">Employee</a></li>
 	</ul>
-	<div style="background: #fff">
-	<fb:login-button scope="public_profile,email" onlogin="checkLoginState();" data-max-rows="1" data-size="icon" data-show-faces="true" data-auto-logout-link="true"></fb:login-button>
-	</div>
 	<div class="navbar">
 		<input type="text" class="input mini" />
 		<a class="btn small">검색 <i class="icon-search"></i></a>		
@@ -514,6 +511,7 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 			  the JavaScript SDK to present a graphical Login button that triggers
 			  the FB.login() function when clicked.
 			-->
+			<fb:login-button scope="public_profile,email" onlogin="checkLoginState();" data-max-rows="1" data-size="icon" data-show-faces="false" data-auto-logout-link="true"></fb:login-button>
 			<a class="btn small" id="langText" onclick="langSelector.show();">한국어 <i class="icon-arrow1"></i></a>
 			<div id="langSelector" class="dropdown" style="margin-left: -15px;">
 				<div class="anchor"></div>

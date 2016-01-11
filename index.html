@@ -60,11 +60,11 @@ var scheduler = {
 		toEvent : function(scheduler){
 			var event = $('#calendar').fullCalendar('clientEvents',scheduler.id);
 			if(event[0] == null)event[0] = {}; 
-			event[0].id = scheduler.id,
-			event[0].title = scheduler.title,
-			event[0].contents = scheduler.contents,
-			event[0].start = new Date(scheduler.start||scheduler.starttime),
-			event[0].end = new Date(scheduler.end||scheduler.endtime),
+			event[0].id = scheduler.id;
+			event[0].title = scheduler.title;
+			event[0].contents = scheduler.contents;
+			event[0].start = new Date(scheduler.start||scheduler.starttime);
+			event[0].end = new Date(scheduler.end||scheduler.endtime);
 			return event[0];
 		}		
 };

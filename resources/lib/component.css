@@ -75,3 +75,14 @@ iframe{
     background: #fff;
     clear: both;
 }
+
+#naver_id_login{
+	float: left;
+    display: inline-block;
+    position: relative;
+    margin-right: 5px;
+}
+
+#naver_id_login > a{
+	border: none;
+}

@@ -76,7 +76,7 @@ iframe{
     clear: both;
 }
 
-#naver_id_login{
+.g-signin2{
 	float: left;
     display: inline-block;
     position: relative;

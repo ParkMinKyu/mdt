@@ -28,8 +28,6 @@
 <script src="/mdt/resources/SE/js/HuskyEZCreator.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/lib/intranet_DATE.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/lib/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="/mdt/resources/lib/jquery.cookie-1.4.1.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="//static.nid.naver.com/js/naverLogin_implicit-1.0.2.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/jui-1.4.3/dist/jui.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/fullcalendar-2.5.0/lib/moment.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/fullcalendar-2.5.0/fullcalendar.min.js" type="text/javascript" charset="utf-8"></script>
@@ -521,15 +519,7 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 		<input type="text" class="input mini" />
 		<a class="btn small">검색 <i class="icon-search"></i></a>		
 		 <div class="inline-right right">
-		 <div id="naver_id_login"></div>
-		<script type="text/javascript">
-			var naver_id_login = new naver_id_login("IGu39BEuxfLYU3__3I_G", "http://parkminkyu.github.io/mdt/");
-			naver_id_login.setButton("white", 2,22);
-			naver_id_login.setDomain(".github.io");
-			naver_id_login.setState("abcdefghijkmnopqrst");
-			naver_id_login.init_naver_id_login();
-		</script>
-		<div class="g-signin2" data-onsuccess="onSignIn"></div>
+		<div class="g-signin2" data-width="75" data-height="22" data-longtitle="true" data-onsuccess="onSignIn">
 			 <!--
 			  Below we include the Login Button social plugin. This button uses
 			  the JavaScript SDK to present a graphical Login button that triggers

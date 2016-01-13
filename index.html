@@ -25,7 +25,6 @@
 <link rel="stylesheet" href="/mdt/resources/fullcalendar-2.5.0/fullcalendar.min.css" />
 <link rel="stylesheet" href="/mdt/resources/fullcalendar-2.5.0/fullcalendar.print.css" media="print"/>
 <link rel="stylesheet" href="/mdt/resources/lib/component.css" />
-<script src="//apis.google.com/js/platform.js" async defer></script>
 <script src="/mdt/resources/SE/js/HuskyEZCreator.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/lib/intranet_DATE.js" type="text/javascript" charset="utf-8"></script>
 <script src="/mdt/resources/lib/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
@@ -492,14 +491,6 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
         'Thanks for logging in, ' + response.name + '!'; */
     });
   }
-  
-  function onSignIn(googleUser) {
-	  var profile = googleUser.getBasicProfile();
-	  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-	  console.log('Name: ' + profile.getName());
-	  console.log('Image URL: ' + profile.getImageUrl());
-	  console.log('Email: ' + profile.getEmail());
-	}
 </script>
  <div id="fb-root"></div>
 <div style="float: right; margin: 10px; margin-right:26px;">
@@ -520,7 +511,6 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 		<input type="text" class="input mini" />
 		<a class="btn small">검색 <i class="icon-search"></i></a>		
 		 <div class="inline-right right">
-		<div class="g-signin2" data-width="75" data-height="22" data-longtitle="true" data-onsuccess="onSignIn"></div>
 			 <!--
 			  Below we include the Login Button social plugin. This button uses
 			  the JavaScript SDK to present a graphical Login button that triggers

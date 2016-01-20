@@ -136,6 +136,7 @@ $(function(){
 		
 		$('#mainDiv > div').hide();
 		$('#div'+this.id).show();
+		renderingView(this.id);
 	});		
 	
 	/* build the language selector's options
@@ -171,6 +172,28 @@ $(function(){
 		fCreator: "createSEditor2"
 	});
 });
+
+function renderingView(id){
+	if(id == 'Schedule'){
+		renderCalendar();
+	}else if(id == 'Article'){
+		 $.ajax({
+	         url: "http://localhost:10000/articles",
+	         dataType: 'json',
+	         data: {
+	         },
+	         success: function(response) {
+	        	console.log(response);
+	        	table_1.reset();
+	        	table_1.insert(0,response);
+	         },
+	         error : function(response,txt){
+	         	console.log(response);
+	         	console.log(txt);
+	         }
+	     });
+	}
+}
 
 function renderCalendar() {
 	$('#calendar').fullCalendar({
@@ -283,26 +306,7 @@ jui.ready([ "uix.window" ], function(win) {
 });
 
 jui.ready([ "uix.table" ], function(table) {
-    table_1 = table("#table_1", {
-        data: [
-            { name: "Hong", age: "20", location: "Ilsan" },
-            { name: "Jung", age: "30", location: "Seoul" },
-            { name: "Park", age: "15", location: "Yeosu" },
-            { name: "Kang", age: "32", location: "Seoul" },
-            { name: "Song", age: "12", location: "Gwangju" },
-            { name: "Yoon", age: "22", location: "Damyang" },
-            { name: "Kim", age: "33", location: "Busan" },
-            { name: "Hwang", age: "21", location: "Seoul" },
-			{ name: "Hong", age: "20", location: "Ilsan" },
-            { name: "Jung", age: "30", location: "Seoul" },
-            { name: "Park", age: "15", location: "Yeosu" },
-            { name: "Kang", age: "32", location: "Seoul" },
-            { name: "Song", age: "12", location: "Gwangju" },
-            { name: "Yoon", age: "22", location: "Damyang" },
-            { name: "Kim", age: "33", location: "Busan" },            
-            { name: "Hwang", age: "21", location: "Seoul" }
-        ]
-    });
+    table_1 = table("#table_1", {});
 });
 
 jui.ready([ "ui.paging" ], function(paging) {
@@ -675,9 +679,10 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 					<table id="table_1" class="table classic">
 						<thead>
 						<tr>
-							<th>Name</th>
-							<th>Age</th>
-							<th>Location</th>
+							<th>Id</th>
+							<th>Title</th>
+							<th>RegTime</th>
+							<th>Writer</th>
 						</tr>
 						</thead>
 						<tbody></tbody>
@@ -685,9 +690,10 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
 					
 					<script data-jui="#table_1" data-tpl="row" type="text/template">
 						<tr>
-							<td><!= name !></td>
-							<td><!= age !></td>
-							<td><!= location !></td>
+							<td><!= ID !></td>
+							<td><!= TITLE !></td>
+							<td><!= REGTIME !></td>
+							<td><!= WRITER !></td>
 						</tr>
 					</script>
 					

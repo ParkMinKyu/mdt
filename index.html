@@ -177,21 +177,9 @@ function renderingView(id){
 	if(id == 'Schedule'){
 		renderCalendar();
 	}else if(id == 'Article'){
-		 $.ajax({
-	         url: "http://localhost:10000/articles",
-	         dataType: 'json',
-	         data: {
-	         },
-	         success: function(response) {
-	        	console.log(response);
-	        	table_1.reset();
-	        	table_1.insert(0,response);
-	         },
-	         error : function(response,txt){
-	         	console.log(response);
-	         	console.log(txt);
-	         }
-	     });
+		var node = tree_1.select("0.0");
+		if(node)
+   			paging_1_submit(node.data.id);	
 	}
 }
 
@@ -305,49 +293,97 @@ jui.ready([ "uix.window" ], function(win) {
     });
 });
 
-jui.ready([ "uix.table" ], function(table) {
-    table_1 = table("#table_1", {});
-});
-
-jui.ready([ "ui.paging" ], function(paging) {
+jui.ready([ "uix.xtable","ui.paging" ], function(xtable, paging) {
+    table_1 = xtable("#table_1", {fields: [ "id", "title", "regtime", "writer" ],
+        resize: false,
+        sort: true,
+        sortLoading: true,
+        buffer: "s-page",
+        bufferCount: 16,
+        scrollHeight : 450,
+        event: {
+            sortend: function(data, e) {
+                paging_2.first();
+            }
+        },
+        tpl: {
+            row: $("#tpl_row").html()
+        }
+     });
+    
     paging_1 = paging("#paging_1", {
-        count: 1000,
         pageCount: 16,
-        screenCount: 7,
+        screenCount : 7,
         event: {
             page: function(pNo) {
-                alert(pNo);
+            	table_1.page(pNo);
             }
+        },
+        tpl: {
+            pages: $("#tpl_pages").html()
         }
     });
+
+    paging_1_submit = function(categoryid) {
+    	$.ajax({
+            url: "http://localhost:10000/articles",
+            dataType: 'json',
+            data: {
+           	 page : paging_1.page(),
+           	 pageCount : paging_1.options.pageCount,
+             screenCount : paging_1.options.screenCount,
+             writer : 'parkmk',
+             categoryid : categoryid
+            },
+            success: function(response) {
+    	       	table_1.update(response.articles);
+    	       	table_1.resize();
+    	        paging_1.reload(table_1.count());
+            },
+            error : function(response,txt){
+            	console.log(response);
+            	console.log(txt);
+            }
+        });
+    }
 });
 
 jui.ready([ "uix.tree" ], function(tree) {
     tree_1 = tree("#tree_1 .tree", {
-        root: { title: "C:\\" },
+        root: { title: "Category" },
         event: {
             select: function(node) {
-                this.select(node.index);
-                alert("index(" + node.index + "), title(" + node.data.title + ")");
+            	tree_1.select(node.index);
+            	if(node.data.id){
+            		paging_1_submit(node.data.id);	
+            	}
             }
         },
         tpl: {
             node: $("#tpl_node").html()
         }
     });
-    tree_1.append({ title: "Windows" });
-    tree_1.append({ title: "Download" });
-    tree_1.append({ title: "Program Files" });
-    tree_1.append({ title: "Apache" });
-    tree_1.append("0", { title: "run.exe" });
-    tree_1.append("0", { title: "setting.conf" });
-    tree_1.append("1", { title: "jui.torrrent" });
-    tree_1.insert("2.0", { title: "Riot Games" });
-    tree_1.insert("2.0.0", { title: "lol.exe" });
-    tree_1.append("3", { title: "startup.bat" });
-    tree_1.fold("0");
-    tree_1.fold("1");
-    tree_1.fold("3");
+    
+    $.ajax({
+		url: "http://localhost:10000/categories",
+		type : 'get',
+		dataType: 'json',
+		data: {writer:'parkmk'},
+		success: function(response) {
+			for(var i = 0 ; i < response.length ; i ++){
+				var category = response[i];
+				if(category.GROUPID == null){
+					tree_1.append({title : category.TITLE});
+				}else{
+					tree_1.append(parseInt(category.GROUPID,10) -1,{title : category.TITLE, id:category.ID});
+				}
+			}
+		},
+		error : function(response, txt){
+			console.log(response);
+			console.log(txt);
+		}
+	});
 });
 
 jui.ready([ "ui.accordion" ], function(accordion) {

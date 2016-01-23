@@ -45,7 +45,7 @@ var scheduler = {
 			this.title = event.title;
 			this.contents = event.contents;
 			this.starttime = event.start;
-			this.endtime = event.end;
+			this.endtime = event.end||event.start;
 			this.writer = event.writer;
 		},
 		toEvent : function(){
@@ -73,6 +73,8 @@ var article = {};
 $(function(){	
 	$('#contentsModify').on('click',function(){
 		$('#writeModal #title').val(scheduler.title);
+		spicker.select(scheduler.starttime);
+		epicker.select(scheduler.endtime);
 		oEditors.getById["contents"].exec("PASTE_HTML",[scheduler.contents]);
 		contentView.hide();
 		writeWindow.show();
@@ -84,10 +86,10 @@ $(function(){
 		scheduler.title = $('#writeModal #title').val();
 		scheduler.contents = $('#contents').val();
 		scheduler.allDay = true;
-		scheduler.starttime = new Date();
-		scheduler.endtime = new Date();
+		scheduler.starttime = spicker.getDate();
+		scheduler.endtime = epicker.getDate();
 		if(scheduler.id > 0 ){
-			type = "put";
+			type = "PATCH";
 		}
 		$.ajax({
 			url: "http://localhost:10000/scheduler",
@@ -179,7 +181,7 @@ function renderingView(id){
 	}else if(id == 'Article'){
 		var node = tree_1.select("0.0");
 		if(node)
-   			paging_1_submit(node.data.id);	
+   			paging_1_submit(node.data.id);
 	}
 }
 
@@ -205,8 +207,8 @@ function renderCalendar() {
 		            url: "http://localhost:10000/scheduler",
 		            dataType: 'json',
 		            data: {
-		        		starttime : sdate._d.getTime(),
-		        		endtime : edate._d.getTime()
+		        		starttime : sdate.format("YYYY-MM-DD HH:mm:ss"),
+		        		endtime : edate.format("YYYY-MM-DD HH:mm:ss")
 		            },
 		            success: function(response) {
 		        	 	var events = [];
@@ -243,12 +245,18 @@ function renderCalendar() {
 			contentView.show();
 		},
 		dayClick : function(date, jsE, view){
-			console.log(date);
-			console.log(jsE);
-			console.log(view);
-			scheduler.id = 0;
-			oEditors.getById["contents"].setContents('');
-			writeWindow.show();
+			if(checkLoginState().status == "connected"){
+				console.log(date);
+				console.log(jsE);
+				console.log(view);
+				scheduler.id = 0;
+				spicker.select(date.format());
+				epicker.select(date.format());
+				oEditors.getById["contents"].setContents('');
+				writeWindow.show();
+			}else{
+				alert("페이스북 로그인 후 사용 가능 합니다.");
+			}
 		}
 	});
 }

@@ -245,7 +245,7 @@ function renderCalendar() {
 			contentView.show();
 		},
 		dayClick : function(date, jsE, view){
-			if(checkLoginState().status == "connected"){
+			if(FB.getAccessToken()){
 				console.log(date);
 				console.log(jsE);
 				console.log(view);
@@ -532,7 +532,6 @@ jui.ready([ "ui.datepicker" ], function(datepicker) {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
-      scheduler.writer = response.id;
      /*  document.getElementById('status').innerHTML =
         'Thanks for logging in, ' + response.name + '!'; */
     });
